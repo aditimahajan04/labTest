@@ -1,0 +1,128 @@
+a.Write a JSP program that takes the user’s name and age from a form. Echo back the nameand age along with a message stating the price of movie tickets. The price is determinedbythe age passed totheJSP.
+•	Iftheageisgreaterthan62,themovieticketpriceisRs.50.
+•	Ifthe userislessthan 10yearsold, theprice isRs.30.
+Foreveryoneelse,thepriceisRs.80.
+		
+<%@ page import="java.io.,java.util." %>
+<%
+    // Retrieve the name and age from the request
+    String name = request.getParameter("name");
+    String ageString = request.getParameter("age");
+
+    // Parse the age as an integer
+    int age = Integer.parseInt(ageString);
+
+    // Initialize ticket price variable
+    int ticketPrice = 0;
+
+    // Determine the ticket price based on the age
+    if (age > 60) {
+        ticketPrice = 50; // Senior citizens
+    } else if (age < 18) {
+        ticketPrice = 30; // Children
+    } else {
+        ticketPrice = 80; // Adults
+    }
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ticket Price</title>
+</head>
+<body>
+    <h2>Movie Ticket Information</h2>
+    <p>Welcome <%= name %>.</p>
+    <p>Your age is: <%= age %> years.</p>
+    <p>The price of the movie ticket is Rs. <%= ticketPrice %>.</p>
+    <br>
+    <a href="form.html">Go back to the form</a>
+</body>
+</html>
+b.Write a Java Servlet program that loads area and phone no. of police station of that area from a database. It takes area or phone number as input and prints the details in a separate page. Create police_station table with appropriate fields.
+
+// Police.java
+
+package myPack;
+
+import java.io.*;
+import java.sql.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+//import jakarta.servlet.annotation.*;
+
+//@WebServlet("/Police")
+public class Police extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/dbName"; // Update this
+    private static final String USER = "root"; // Update this
+    private static final String PASS = ""; // Update this
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        String area = request.getParameter("area");
+        String phoneNumber = request.getParameter("phoneNumber");
+
+        Connection conn = null;
+        PreparedStatement pStmt = null;
+
+        try {
+            //Class.forName("com.mysql.cj.jdbc.Driver");
+
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            String sql = "SELECT * FROM police_station WHERE area = ? OR phone_number = ?";
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, area);
+            pStmt.setString(2, phoneNumber);
+
+            ResultSet rs = pStmt.executeQuery();
+
+            if (rs.next()) {
+                out.println("<h2>Police Station Details:</h2>");
+                out.println("Area: " + rs.getString("area") + "<br>");
+                out.println("Phone Number: " + rs.getString("phone_number") + "<br>");
+                out.println("Address: " + rs.getString("address") + "<br>");
+            } else {
+                out.println("<h2>No police station found for the given area or phone number.</h2>");
+            }
+
+        //} catch (ClassNotFoundException e) {
+        //    e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pStmt != null)
+                    pStmt.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Police Station</title>
+</head>
+<body>
+    <h1>Police Station</h1>
+    <form action="Police" method="post">
+        Area: <input type="text" name="area"><br><br>
+        Phone Number: <input type="text" name="phoneNumber"><br><br>
+        <button type="submit">Lookup</button>
+    </form>
+</body>
+</html>
