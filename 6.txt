@@ -1,0 +1,97 @@
+6	a.	Develop a JSP application that has the following pages. The index page register.html contains 2 text boxes for entering username and password. Provide a button "Register". Once the Register button is clicked the page should be redirected to welcome.jsp. In welcome.jsp validate username and password and display welcome message for a valid user (Use Sessions).
+
+<%@ page import="javax.servlet.,java.io." %>
+
+<%
+String username = request.getParameter("username");
+String password = request.getParameter("password");
+
+HttpSession sess = request.getSession();
+sess.setAttribute("username", username);
+sess.setAttribute("password", password);
+
+if (username != null && password != null && !username.isEmpty() && !password.isEmpty()) {
+%>
+<p>Welcome <%= sess.getAttribute("username") %></p>
+<%
+} else {
+%>
+<p>Enter valid details</p>
+<%
+}
+%>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>
+        Registration Using Session
+    </title>
+</head>
+<body>
+    <h2>Welcome to Registration Page</h2>
+    <form action="welcome.jsp" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username"><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password"><br><br>
+        
+        <input type="submit" value="Register">
+    </form>
+</body>
+</html>
+	b.Writeajavaservletprogramtoimplementawebpagetocheckifthevoteriseligibleornot.Userwillenterhisfirstname,lastname,emailidanddateofbirth.Checkif
+heis eligibleto voteor not.Validate thepagebeforedisplayingthedetails.
+
+// Voting.java
+
+package myPack;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.io.*;
+//import jakarta.servlet.annotation.*;
+
+//@WebServlet("/Voting")
+public class Voting extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        String fname = request.getParameter("fname");
+        String lname = request.getParameter("lname");
+        String age = request.getParameter("age");
+
+        response.getWriter().println("<html><body>");
+        if (Integer.parseInt(age) >= 18) {
+	        response.getWriter().println("<h1>You are eligible, " + fname + " " + lname + "!</h1>");
+        } else {
+	        response.getWriter().println("<h1>You are not eligible, " + fname + " " + lname + "!</h1>");
+        }
+        response.getWriter().println("</body></html>");
+    }
+}
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Vote</title>
+    </head>
+    <body>
+        <h1>Voting Page</h1>
+        <form action="Voting" method="POST">
+            <label for="fname">First Name:</label>
+            <input type="text" id="fname" name="fname" required>
+            <label for="lname">Last Name:</label>
+            <input type="text" id="lname" name="lname" required>
+            <label for="mail">E-mail:</label>
+            <input type="text" id="mail" name="mail" required>
+            <label for="age">Age:</label>
+            <input type="text" id="age" name="age" required>
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>
