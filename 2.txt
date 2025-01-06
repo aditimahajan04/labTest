@@ -1,0 +1,139 @@
+a.	Write a JSP program to retrieve and display Student Information. Create an index.html page to collect the USN (University Serial Number) of the student from the user. In displayData.jsp, connect to the database, and retrieve the student details based on the USN entered by the user. If the USN exists in the database, display the corresponding USN and Name. If the USN does not exist, display the message: "Invalid USN".
+
+<!-- displayData.jsp -->
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Student Details</title>
+</head>
+<body>
+    <h1>Student Details</h1>
+    <%
+        String URL = "jdbc:mysql://localhost:3306/dbName"; // Update this
+        String User = "root"; // Update this
+        String Pass = ""; // Update this
+
+        String usn = request.getParameter("usn");
+        Connection conn = null;
+        PreparedStatement pStmt = null;
+        try {
+            conn = DriverManager.getConnection(URL, User, Pass);
+
+            String sql = "SELECT * FROM Student WHERE USN = ?";
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, usn);
+            ResultSet rs = pStmt.executeQuery();
+            if (rs.next()) {
+                String name = rs.getString("Name");
+                out.println("<p>USN: " + usn + "</p>");
+                out.println("<p>Name: " + name + "</p>");
+            } else {
+                out.println("<p>Invalid USN</p>");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pStmt != null)
+                    pStmt.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    %>
+</body>
+</html>
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Student Details</title>
+</head>
+<body>
+    <h1>Enter USN</h1>
+    <form action="displayData.jsp" method="post">
+        USN: <input type="text" name="usn" required><br><br>
+        <input value="Submit" type="submit">
+    </form>
+</body>
+</html>
+b.	Write a Java Servlet Program to implement a simple calculator. Validate the input data and display appropriate messages.
+ 
+// Calculate.java
+
+package myPack;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.io.*;
+//import jakarta.servlet.annotation.*;
+
+//@WebServlet("/Calculate")
+public class Calculate extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		String nl = req.getParameter("nl"), n2 = req.getParameter("n2"), op = req.getParameter("op");
+		res.setContentType("text/html");
+		PrintWriter out = res.getWriter();
+		double r= 0, a = Double.parseDouble(nl), b = Double.parseDouble(n2);
+		if (op.equals("Addition")) {
+			r = a + b;
+		} else if (op.equals("Subtraction")) {
+			r = a - b;
+		} else if (op.equals("Multiplication")) {
+			r = a * b;
+		} else if (op.equals("Division")) {
+			if (b!= 0) {
+				r = a / b;
+			} else {
+				r = Double.MAX_VALUE;
+			}
+		} else if (op.equals("e^x")) {
+			r = Math.exp(a);
+		}
+		out.println("<html><body>");
+		out.println("<h1>Result is: " + String.valueOf(r) + "</h1>");
+		out.println("</body></html>");
+	}
+}
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Calculator</title>
+    </head>
+    <body>
+        <form action = "Calculate" method = "POST">
+            <label>First Number (x): </label>
+            <input type = "text" name = "nl" required><br><br>
+            <label>Second Number:</label>
+            <input type = "text" name = "n2"><br>
+            <p>Select operation: </p>
+            <input type="radio" name = "op" value = "Addition">
+            <label>Addition</label><br>
+            <input type="radio" name = "op" value = "Subtraction">
+            <label>Subtraction</label><br>
+            <input type = "radio" name = "op" value = "Multiplication">
+            <label>Multiplication</label><br>
+            <input type = "radio" name = "op" value = "Division">
+            <label>Division</label><br>
+            <input type = "radio" name = "op" value = "e^x">
+            <label>e^x</label><br><br>
+            <input type = "submit" value = "Submit">
+        </form>
+    </body>
+</html>
