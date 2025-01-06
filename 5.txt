@@ -1,0 +1,135 @@
+a.Write a servlet program that uses JDBC to display the subjects allotted for the faculty. Subjects Table should have Sub_ID, Sub_Name andFaculty_ID as the fields. Update subject details for afaculty and display how many rows are updated
+
+// Subjects.java
+
+package myPack;
+
+import java.io.*;
+import java.sql.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+//import jakarta.servlet.annotation.*;
+
+//@WebServlet("/Subjects")
+public class Subjects extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/dbName"; // Update this
+    private static final String USER = "root"; // Update this
+    private static final String PASS = ""; // Update this
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        String facultyId = request.getParameter("facultyId");
+        String subName = request.getParameter("subName");
+
+        conn = null;
+        PreparedStatement pStmt = null;
+
+        try {
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            String updateSQL = "UPDATE Subjects SET Sub_Name = ? WHERE Faculty_ID = ?";
+            pStmt = conn.prepareStatement(updateSQL);
+            pStmt.setString(1, subName);
+            pStmt.setInt(2, Integer.parseInt(facultyId));
+            int rowsUpdated = pStmt.executeUpdate();
+
+            out.println("<h2>Number of rows updated: " + rowsUpdated + "</h2>");
+
+            String querySQL = "SELECT * FROM Subjects WHERE Faculty_ID = ?";
+            pStmt = conn.prepareStatement(querySQL);
+            pStmt.setInt(1, Integer.parseInt(facultyId));
+            ResultSet rs = pStmt.executeQuery();
+
+            out.println("<h2>Subjects Allotted for Faculty ID: " + facultyId + "</h2>");
+            out.println("<table border='1'><tr><th>Sub_ID</th><th>Sub_Name</th><th>Faculty_ID</th></tr>");
+            while (rs.next()) {
+                out.println("<tr><td>" + rs.getInt("Sub_ID") + "</td><td>" + rs.getString("Sub_Name") + "</td><td>" + rs.getInt("Faculty_ID") + "</td></tr>");
+            }
+            out.println("</table>");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pStmt != null)
+                    pStmt.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Update Faculty Subjects</title>
+</head>
+<body>
+    <h1>Update Faculty Subjects</h1>
+    <form action="Subjects" method="post">
+        Faculty ID: <input type="text" name="facultyId" required><br><br>
+        Subject Name: <input type="text" name="subName" required><br><br>
+        <button type="submit">Update Subject</button>
+    </form>
+</body>
+</html>
+b.Write a Java Servlet Program to display how many times a visitor is visiting the webpage using session object. If the user is visiting for the first time, display Welcome message, else display the number of times he is visiting the page.
+
+// VisitCount.java
+
+package myPack;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.io.*;
+//import jakarta.servlet.annotation.*;
+
+//@WebServlet("/VisitCount")
+public class VisitCount extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        HttpSession session = request.getSession();
+        Integer visitCount = (Integer) session.getAttribute("visitCount");
+
+        out.println("<html><body>");
+        if (visitCount == null) {
+            visitCount = 1;
+            session.setAttribute("visitCount", visitCount);
+            out.println("<h2>Welcome! This is your first visit.</h2>");
+        } else {
+            visitCount++;
+            session.setAttribute("visitCount", visitCount);
+            out.println("<h2>Welcome back! You have visited this page " + visitCount + " times.</h2>");
+        }
+        out.println("</body></html>");
+    }
+}
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Visit Counter</title>
+</head>
+<body>
+    <h1>Visit Counter Example</h1>
+    <form action="VisitCount" method="get">
+        <button type="submit">Check Visit Count</button>
+    </form>
+</body>
+</html>
