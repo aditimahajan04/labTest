@@ -1,0 +1,144 @@
+/a.Create and store three cookies with different attributes (such as name, value, expiration time, etc.).Retrieve and display the stored cookies using a second JSP program, extracting their names, values, and any additional attributes/
+
+<!-- setCookies.jsp -->
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Set Cookies</title>
+</head>
+<body>
+    <h1>Setting Cookies</h1>
+    <%
+        Cookie cookie1 = new Cookie("cookie1", "value1");
+        Cookie cookie2 = new Cookie("cookie2", "value2");
+        Cookie cookie3 = new Cookie("cookie3", "value3");
+
+        cookie1.setMaxAge(60 * 60); // 1 hour
+        cookie2.setMaxAge(60 * 60 * 24); // 1 day
+        cookie3.setMaxAge(60 * 60 * 24 * 7); // 1 week
+
+        response.addCookie(cookie1);
+        response.addCookie(cookie2);
+        response.addCookie(cookie3);
+
+        out.println("<p>Cookies have been set.</p>");
+    %>
+    <a href="index.html">Back to Home</a>
+</body>
+</html>
+
+<!-- getCookies.jsp -->
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Get Cookies</title>
+</head>
+<body>
+    <h1>Getting Cookies</h1>
+    <%
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            out.println("<table border='1'><tr><th>Name</th><th>Value</th></tr>");
+            for (Cookie cookie : cookies) {
+                out.println("<tr><td>" + cookie.getName() + "</td><td>" + cookie.getValue() + "</td></tr>");
+            }
+            out.println("</table>");
+        } else {
+            out.println("<p>No cookies found.</p>");
+        }
+    %>
+    <a href="index.html">Back to Home</a>
+</body>
+</html>
+
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cookie Example</title>
+</head>
+<body>
+    <h1>Cookie Example</h1>
+    <a href="setCookies.jsp">Set Cookies</a><br><br>
+    <a href="getCookies.jsp">Get Cookies</a>
+</body>
+</html>
+
+/b. WriteaServletprogramthat readsfollowinginformation->Employee’sname,number of hours worked in week, hourly pay rate, tax (20%) from the user and prints a statement of payroll with employee’s details./
+
+
+// Payroll.java
+package myPack;
+
+import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+
+public class Payroll extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Set content type
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        // Retrieve input from the request
+        String employeeName = request.getParameter("employeeName");
+        int hoursWorked = Integer.parseInt(request.getParameter("hoursWorked"));
+        double hourlyPayRate = Double.parseDouble(request.getParameter("hourlyPayRate"));
+        double taxRate = 20.0; // 20%
+
+        // Calculate payroll details
+        double grossPay = hoursWorked * hourlyPayRate;
+        double taxAmount = grossPay * (taxRate / 100);
+        double netPay = grossPay - taxAmount;
+
+        // Display payroll statement
+        out.println("<!DOCTYPE html>");
+        out.println("<html><head><title>Payroll Statement</title></head><body>");
+        out.println("<h1>Payroll Statement</h1>");
+        out.println("<p><strong>Employee Name:</strong> " + employeeName + "</p>");
+        out.println("<p><strong>Hours Worked:</strong> " + hoursWorked + "</p>");
+        out.println("<p><strong>Hourly Pay Rate:</strong> $" + hourlyPayRate + "</p>");
+        out.println("<p><strong>Gross Pay:</strong> $" + grossPay + "</p>");
+        out.println("<p><strong>Tax Amount (20%):</strong> $" + taxAmount + "</p>");
+        out.println("<p><strong>Net Pay:</strong> $" + netPay + "</p>");
+        out.println("<br><a href='payrollForm.html'>Go back to the form</a>");
+        out.println("</body></html>");
+    }
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Payroll Form</title>
+</head>
+<body>
+    <h1>Employee Payroll Form</h1>
+    <form action="Payroll" method="post">
+        <label for="employeeName">Employee Name:</label>
+        <input type="text" id="employeeName" name="employeeName" required><br><br>
+
+        <label for="hoursWorked">Hours Worked in a Week:</label>
+        <input type="number" id="hoursWorked" name="hoursWorked" required><br><br>
+
+        <label for="hourlyPayRate">Hourly Pay Rate:</label>
+        <input type="number" step="0.01" id="hourlyPayRate" name="hourlyPayRate" required><br><br>
+
+        <button type="submit">Calculate Payroll</button>
+    </form>
+</body>
+</html>
